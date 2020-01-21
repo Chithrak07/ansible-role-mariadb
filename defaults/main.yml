@@ -14,7 +14,6 @@ mysql_general_log: 0
 mysql_slow_query_log: 0
 mysql_slow_query_log_file: /var/log/mysql/mariadb-slow.log
 mysql_long_query_time: 10
-
 # --------------------------------
 # These below are all optional settings and could have negative side effects if supplied.
 # Only add these if you know what you are doing.
@@ -39,6 +38,7 @@ mariadb_repo_deb_arch: 'amd64,arm64,ppc64el'
 client_only: false
 
 # Defaults for /etc/.my.cnf template
+mysql_root_password: drupal
 mysql_user: root
 mysql_host_address: localhost
 mysql_port: 3306

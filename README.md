@@ -3,6 +3,61 @@ mariadb
 
 For setting up MariaDB on Ubuntu.
 
+# Test Suite Setup (Molecule)
+
+- To run the whole test suite for all environments
+```bash
+$ tox
+```
+
+## Setup Local Virtual Environment
+
+- to run a single test
+```bash
+$ python3 -m venv venv
+$ source venv/bin/activate
+$ pip3 install 'molecule[docker]'
+$ pip3 install -r requirements.txt
+$ MOLECULE_DISTRO=ubuntu1604 molecule test
+```
+
+- note that you can substitute MOLECULE_DISTRO=version for the following:
+
+__MOLECULE_DISTRO List__
+    
+    ubuntu1604
+    ubuntu1804
+
+- look here for more images: https://hub.docker.com/r/geerlingguy/
+    
+### Development
+
+- if you are creating a new molecule test suite inside an existing role then execute this ...
+```bash 
+$ molecule init scenario -r ansible-role-mariadb
+```
+- you can change one line and enter a different molecule command to keep the container alive
+    - from the ```MOLECULE_DISTRO``` list above, substitute your desired version for development below
+    
+```bash
+    /molecule/molecule.yml
+    image: "geerlingguy/docker-${MOLECULE_DISTRO:-debian9}-ansible:latest"
+```
+
+- run this command so that the container is not dead
+```bash
+$ molecule test --destroy=never
+```
+
+- ssh into the container after the test
+```bash
+$ molecule login
+```
+
+- run the test suite located in ```molecule/test/test_default.py```
+```bash
+$ molecule verify
+```
 
 Requirements
 ------------
@@ -53,7 +108,7 @@ WARNING: Don't use any of the following unless you absolutely know what you're d
   - Defaults to `auto` which will let Ubuntu install whatever default version comes with Apt.
   - Can be `auto`, `10.1`, `10.2` or any other supported version.
   - When not `auto`, the value for this is used to construct the repo URL
-  - If sepecifying this, you may also need to specify **mariadb_mirror**, **mariadb_mirror_proto**, and **mariadb_repo_deb_arch** - See defaults/main.yml. Visit https://downloads.mariadb.org/mariadb/repositories to dermine the best value for these.
+  - If specifying this, you may also need to specify **mariadb_mirror**, **mariadb_mirror_proto**, and **mariadb_repo_deb_arch** - See defaults/main.yml. Visit https://downloads.mariadb.org/mariadb/repositories to dermine the best value for these.
 
 
 Dependencies

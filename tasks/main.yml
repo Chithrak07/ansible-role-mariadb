@@ -9,14 +9,6 @@
   stat: path=/root/.my.cnf
   register: root_my_cnf
 
-- name: Fail when /root/.my.cnf doesn't exist, and no root password has been provided
-  fail:
-    msg: Could not read password from /root/.my.cnf. If this is the first time running your playbook, append `  --extra-vars mysql_root_password=$(openssl rand -base64 24) `  to your command line. Setting the mysql root password only needs to be done once.
-  when: root_my_cnf is defined
-    and root_my_cnf.stat is defined
-    and root_my_cnf.stat.exists == False
-    and mysql_root_password is not defined
-
 - name: Install software-properties-common
   apt:
     name: software-properties-common
@@ -31,7 +23,9 @@
       id: F1656F24C74CD1D8
   - name: Add apt repo for MariaDB
     apt_repository:
-      repo: deb [arch={{ mariadb_repo_deb_arch }}] {{ mariadb_mirror_proto }}://{{ mariadb_mirror }}/mariadb/repo/{{ mariadb_version }}/ubuntu {{ ansible_distribution_release }} main
+      repo:
+      - "deb [arch={{ mariadb_repo_deb_arch }}] {{ mariadb_mirror_proto }}:\
+      //{{ mariadb_mirror }}/mariadb/repo/{{ mariadb_version }}/ubuntu {{ ansible_distribution_release }} main"
       state: present
       filename: mariadb
       update_cache: true
@@ -44,14 +38,14 @@
     name: mariadb-server
     state: present
     update_cache: yes
-  when: client_only == false
+  when: not client_only
 
 - name: Install MariaDB client
   apt:
     name: mariadb-client
     state: present
     update_cache: yes
-  when: client_only == true
+  when: client_only
 
 - name: Install python module
   apt: name=python-mysqldb state=present
@@ -140,27 +134,27 @@
         - localhost
       when: (root_my_cnf is defined
         and root_my_cnf.stat is defined
-        and root_my_cnf.stat.exists == False)
+        and not root_my_cnf.stat.exists)
         or mysql_root_password is defined
       register: mysql_password_changed
 
-  when: client_only == false
+  when: not client_only
 
 
 - name: Save mysql root password credentials to /root/.my.cnf
-  template: src=root/my.cnf.j2 dest=/root/.my.cnf owner=root mode=0600 backup=yes
+  template: src=templates/root/my.cnf.j2 dest=/root/.my.cnf owner=root mode=0600 backup=yes
   when: (
       mysql_password_changed is defined
       and mysql_password_changed is changed
     )
     or (
-      client_only == true
+      client_only
       and mysql_root_password is defined
     )
 
 - name: Apply Acro's MariaDB 10.0 server config to Ubuntu 16.04
   template:
-    src: etc/mysql/conf.d/acro.cnf.j2
+    src: templates/etc/mysql/conf.d/acro.cnf.j2
     dest: /etc/mysql/conf.d/acro.cnf
     owner: root
     mode: 0644
@@ -168,11 +162,11 @@
   notify:
     - armdb restart mysql
   when: ansible_distribution_version == '16.04'
-    and client_only == false
+    and not client_only
 
 - name: Apply MariaDB server customizations on Ubuntu >= 18.04
   template:
-    src: etc/mysql/mariadb.conf.d/99-acromedia-server-overrides.cnf.j2
+    src: templates/etc/mysql/mariadb.conf.d/99-acromedia-server-overrides.cnf.j2
     dest: /etc/mysql/mariadb.conf.d/99-acromedia-server-overrides.cnf
     owner: root
     group: root
@@ -182,11 +176,11 @@
     - armdb restart mysql
   when: ansible_distribution == 'Ubuntu' and
     ansible_distribution_major_version|int >= 18
-    and client_only == false
+    and not client_only
 
 - name: Apply MariaDB cient customizations on Ubuntu >= 18.04
   template:
-    src: etc/mysql/mariadb.conf.d/99-acromedia-client-overrides.cnf.j2
+    src: templates/etc/mysql/mariadb.conf.d/99-acromedia-client-overrides.cnf.j2
     dest: /etc/mysql/mariadb.conf.d/99-acromedia-client-overrides.cnf
     owner: root
     mode: 0644
