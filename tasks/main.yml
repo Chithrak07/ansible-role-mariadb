@@ -9,6 +9,17 @@
   stat: path=/root/.my.cnf
   register: root_my_cnf
 
+- name: Fail when /root/.my.cnf doesn't exist, and no root password has been provided
+  fail:
+    msg: "Could not read password from /root/.my.cnf. \
+    If this is the first time running your playbook, \
+    append `  --extra-vars mysql_root_password=$(openssl rand -base64 24) `  \
+    to your command line. Setting the mysql root password only needs to be done once."
+  when: root_my_cnf is defined
+    and root_my_cnf.stat is defined
+    and not root_my_cnf.stat.exists
+    and mysql_root_password is not defined
+
 - name: Install software-properties-common
   apt:
     name: software-properties-common

@@ -41,7 +41,7 @@ $ molecule init scenario -r ansible-role-mariadb
     
 ```bash
     /molecule/molecule.yml
-    image: "geerlingguy/docker-${MOLECULE_DISTRO:-debian9}-ansible:latest"
+    image: "geerlingguy/docker-${MOLECULE_DISTRO:-ubuntu1604}-ansible:latest"
 ```
 
 - run this command so that the container is not dead
