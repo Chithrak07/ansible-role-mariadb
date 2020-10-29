@@ -54,7 +54,10 @@
   when: client_only == true
 
 - name: Install python module
-  apt: name=python-mysqldb state=present
+  apt:
+    name:
+      - python3-mysqldb
+    state: present
 
 - block:
     - name: Ensure mysql is running and starts on boot
