@@ -1,0 +1,10 @@
+---
+- name: Check mariadb is configured
+  hosts: all
+  become: yes
+
+  tasks:
+    - name: Check client overrides conf has been created
+      stat:
+        path: /etc/mysql/mariadb.conf.d/99-acromedia-client-overrides.cnf
+      register: stat_result
