@@ -1,6 +1,8 @@
 mariadb
 ======
 
+![.github/workflows/molecule.yml](https://github.com/AcroMedia/ansible-role-mariadb/workflows/.github/workflows/molecule.yml/badge.svg)
+
 For setting up MariaDB on Ubuntu.
 
 
