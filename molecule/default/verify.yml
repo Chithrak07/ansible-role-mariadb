@@ -4,7 +4,19 @@
   become: yes
 
   tasks:
-    - name: Check client overrides conf has been created
-      stat:
-        path: /etc/mysql/mariadb.conf.d/99-acromedia-client-overrides.cnf
-      register: stat_result
+
+    - name: Create database testdb.
+      command: "mysql -u root -proot  -e 'CREATE database testdb;'"
+
+
+    - name: Create table testtb.
+      command: "mysql -u root -proot  -e 'use testdb; CREATE TABLE testtb (id int);'"
+
+
+    - name: Insert in to testtb.
+      command: "mysql -u root -proot  -e 'use testdb; INSERT INTO testtb VALUES (10);'"
+
+    - name: List the databases.
+      command: "mysql -u root -proot  -e 'use testdb; SELECT * from testtb WHERE id=10;'"
+      register: select
+    - debug: var=select.stdout_lines
